@@ -8,24 +8,68 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <style>
-    .carte {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      margin: 8px 0;
-      background: #fff;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
     }
-    button.cloture {
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+    }
+    #horloge {
+      font-size: 0.9em;
+      display: block;
+      margin-top: 5px;
+      color: #e0e0e0;
+    }
+    .colonnes {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+    }
+    .colonne {
+      width: 30%;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .liste-cartes .carte {
+      background: #fafafa;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    /* 🎨 Style bouton Clôturer */
+    .btn-cloture {
+      display: inline-block;
       margin-top: 8px;
       padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      background: #28a745;
+      background: linear-gradient(135deg, #007BFF, #0056b3);
       color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 20px;
       cursor: pointer;
+      transition: all 0.3s ease;
     }
-    button.cloture:hover {
-      background: #218838;
+    .btn-cloture:hover {
+      background: linear-gradient(135deg, #0056b3, #003d80);
+      transform: scale(1.05);
+    }
+    .cloture-info {
+      margin-top: 8px;
+      font-size: 0.9em;
+      color: #2e7d32;
+      font-style: italic;
     }
   </style>
 </head>
@@ -72,25 +116,16 @@
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Fonction pour clore un besoin
-    async function cloturerBesoin(idDoc) {
-      const cloturePar = prompt("Qui clôture ce besoin ?");
-      if (!cloturePar) return;
+    // Fonction Clôture
+    async function cloturerBesoin(id) {
+      const nom = prompt("Entrez votre nom pour clore ce besoin :");
+      if (!nom) return;
 
-      const pcId = navigator.userAgent; // identifiant basique du navigateur
-
-      try {
-        await db.collection("besoins").doc(idDoc).update({
-          statut: "clos",
-          cloturePar,
-          pcId,
-          clotureDate: firebase.firestore.Timestamp.now()
-        });
-        alert("✅ Besoin clôturé avec succès !");
-      } catch (error) {
-        console.error("Erreur lors de la clôture :", error);
-        alert("❌ Erreur lors de la clôture du besoin.");
-      }
+      await db.collection("besoins").doc(id).update({
+        statut: "clos",
+        cloturePar: nom,
+        clotureDate: firebase.firestore.Timestamp.now()
+      });
     }
 
     // Affichage temps réel
@@ -110,15 +145,16 @@
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
 
-        // Forcer affichage bouton si statut absent ou = "ouvert"
-        if (!data.statut || data.statut === "ouvert") {
-          contenu += `<br><button class="cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
-        } else if (data.statut === "clos") {
+        const statut = data.statut || "ouvert";
+
+        if (statut === "ouvert") {
+          contenu += `<br><button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
+        } else if (statut === "clos") {
           contenu += `
-            <p style="color:green;">
-              <strong>Clôturé</strong> par ${data.cloturePar || "?"}
-              (${data.pcId || "?"}) le ${data.clotureDate?.toDate().toLocaleString() || "?"}
-            </p>
+            <div class="cloture-info">
+              ✅ Clôturé le ${data.clotureDate?.toDate().toLocaleString() || "?"} 
+              par <strong>${data.cloturePar || "?"}</strong>
+            </div>
           `;
         }
 
