@@ -7,12 +7,77 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    /* Styles du formulaire intégré */
+    #formContainer {
+      display: none;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    #formContainer label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #formContainer select, 
+    #formContainer input, 
+    #formContainer textarea, 
+    #formContainer button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #formContainer button {
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    #formContainer button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body class="mode-affichage">
   <header>
     <h1>📊 Besoins de Production</h1>
     <span id="horloge"></span>
+    <button onclick="document.getElementById('formContainer').style.display='block'">
+      ➕ Lancer une demande
+    </button>
   </header>
+
+  <!-- Formulaire caché -->
+  <div id="formContainer">
+    <h2>Ajouter un besoin</h2>
+    <form id="form-besoin">
+      <label for="categorie">Catégorie</label>
+      <select id="categorie" required>
+        <option value="methode">Méthodes</option>
+        <option value="qualite">Qualité</option>
+        <option value="controle">Contrôle</option>
+      </select>
+
+      <label for="programme">Programme concerné</label>
+      <input type="text" id="programme" placeholder="Ex: Ligne A" required>
+
+      <label for="commentaire">Commentaire</label>
+      <textarea id="commentaire" rows="3" placeholder="Décrire le besoin..." required></textarea>
+
+      <label for="auteur">Votre nom</label>
+      <input type="text" id="auteur" placeholder="Nom du superviseur" required>
+
+      <button type="submit">Ajouter besoin</button>
+      <button type="button" onclick="document.getElementById('formContainer').style.display='none'">Fermer</button>
+    </form>
+  </div>
 
   <main class="colonnes">
     <section class="colonne methode">
@@ -32,7 +97,7 @@
   </main>
 
   <script>
-    // Configuration Firebase
+    // Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDG4nSTlJjYZiQrqcryhy-cEIkxUBkgi-c",
       authDomain: "suivi-besoins-prod.firebaseapp.com",
@@ -42,14 +107,40 @@
       appId: "1:214097049405:web:d91b0e4f31077907ea7754"
     };
 
-    // Initialisation Firebase
-    firebase.initializeApp(firebaseConfig);
+    // Initialisation
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
     // Horloge
     setInterval(() => {
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
+
+    // Soumission du formulaire
+    document.getElementById("form-besoin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const besoin = {
+        categorie: document.getElementById("categorie").value,
+        programme: document.getElementById("programme").value,
+        commentaire: document.getElementById("commentaire").value,
+        auteur: document.getElementById("auteur").value,
+        date: firebase.firestore.Timestamp.now(),
+        statut: "ouvert"
+      };
+
+      try {
+        await db.collection("besoins").add(besoin);
+        alert("✅ Besoin ajouté avec succès !");
+        e.target.reset();
+        document.getElementById("formContainer").style.display = "none";
+      } catch (error) {
+        console.error("Erreur :", error);
+        alert("❌ Erreur lors de l’ajout du besoin.");
+      }
+    });
 
     // Affichage temps réel
     db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
