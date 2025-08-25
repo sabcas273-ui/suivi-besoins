@@ -4,12 +4,66 @@
   <meta charset="UTF-8">
   <title>Tableau Besoins Production</title>
   <link rel="stylesheet" href="styles.css">
+
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <style>
-    /* Styles du formulaire intégré */
-    #formContainer {
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #007BFF;
+      color: white;
+      padding: 15px;
+    }
+    h1 {
+      margin: 0;
+    }
+    main.colonnes {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px;
+    }
+    section.colonne {
+      flex: 1;
+      margin: 0 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .carte {
+      background: #f9f9f9;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button.demande {
+      background: #28a745;
+      color: white;
+      font-weight: bold;
+    }
+    button.cloture {
+      background: #dc3545;
+      color: white;
+      margin-top: 5px;
+    }
+    #formulaire-container {
       display: none;
       max-width: 500px;
       margin: 20px auto;
@@ -18,44 +72,40 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    #formContainer label {
+    #formulaire-container h2 {
+      margin-top: 0;
+    }
+    label {
       display: block;
       margin-top: 10px;
       font-weight: bold;
     }
-    #formContainer select, 
-    #formContainer input, 
-    #formContainer textarea, 
-    #formContainer button {
+    select, input, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-    #formContainer button {
+    #formulaire-container button[type="submit"] {
       background: #007BFF;
       color: white;
       font-weight: bold;
-      cursor: pointer;
       margin-top: 15px;
-    }
-    #formContainer button:hover {
-      background: #0056b3;
     }
   </style>
 </head>
 <body class="mode-affichage">
   <header>
     <h1>📊 Besoins de Production</h1>
-    <span id="horloge"></span>
-    <button onclick="document.getElementById('formContainer').style.display='block'">
-      ➕ Lancer une demande
-    </button>
+    <div>
+      <button class="demande" onclick="toggleForm()">➕ Lancer une demande</button>
+      <span id="horloge"></span>
+    </div>
   </header>
 
   <!-- Formulaire caché -->
-  <div id="formContainer">
+  <div id="formulaire-container">
     <h2>Ajouter un besoin</h2>
     <form id="form-besoin">
       <label for="categorie">Catégorie</label>
@@ -75,7 +125,6 @@
       <input type="text" id="auteur" placeholder="Nom du superviseur" required>
 
       <button type="submit">Ajouter besoin</button>
-      <button type="button" onclick="document.getElementById('formContainer').style.display='none'">Fermer</button>
     </form>
   </div>
 
@@ -108,9 +157,7 @@
     };
 
     // Initialisation
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     // Horloge
@@ -118,24 +165,63 @@
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Soumission du formulaire
+    // Toggle affichage formulaire
+    function toggleForm() {
+      const form = document.getElementById("formulaire-container");
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    // Générer un ID unique pour le PC (stocké une fois en localStorage)
+    function getPcId() {
+      let id = localStorage.getItem("pcId");
+      if (!id) {
+        id = "PC-" + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("pcId", id);
+      }
+      return id;
+    }
+
+    // Clôturer un besoin
+    async function cloturerBesoin(idDoc) {
+      const nom = prompt("Qui clôture ce besoin ?");
+      if (!nom) return;
+
+      try {
+        await db.collection("besoins").doc(idDoc).update({
+          statut: "clos",
+          cloturePar: nom,
+          pcId: getPcId(),
+          clotureDate: firebase.firestore.Timestamp.now()
+        });
+        alert("✅ Besoin clôturé !");
+      } catch (error) {
+        console.error("Erreur clôture :", error);
+        alert("❌ Impossible de clôturer.");
+      }
+    }
+
+    // Envoi formulaire
     document.getElementById("form-besoin").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const besoin = {
-        categorie: document.getElementById("categorie").value,
-        programme: document.getElementById("programme").value,
-        commentaire: document.getElementById("commentaire").value,
-        auteur: document.getElementById("auteur").value,
-        date: firebase.firestore.Timestamp.now(),
-        statut: "ouvert"
-      };
+      const categorie = document.getElementById("categorie").value;
+      const programme = document.getElementById("programme").value;
+      const commentaire = document.getElementById("commentaire").value;
+      const auteur = document.getElementById("auteur").value;
 
       try {
-        await db.collection("besoins").add(besoin);
+        await db.collection("besoins").add({
+          categorie,
+          programme,
+          commentaire,
+          auteur,
+          date: firebase.firestore.Timestamp.now(),
+          statut: "ouvert"
+        });
+
         alert("✅ Besoin ajouté avec succès !");
         e.target.reset();
-        document.getElementById("formContainer").style.display = "none";
+        document.getElementById("formulaire-container").style.display = "none";
       } catch (error) {
         console.error("Erreur :", error);
         alert("❌ Erreur lors de l’ajout du besoin.");
@@ -152,11 +238,23 @@
         const data = doc.data();
         const carte = document.createElement("div");
         carte.classList.add("carte");
-        carte.innerHTML = `
+
+        let contenu = `
           <strong>${data.programme}</strong>
           <p>${data.commentaire}</p>
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
+
+        if (data.statut === "ouvert") {
+          contenu += `<br><button class="cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
+        } else if (data.statut === "clos") {
+          contenu += `
+            <p style="color:green;"><strong>Clôturé</strong> par ${data.cloturePar}
+            (${data.pcId}) le ${data.clotureDate.toDate().toLocaleString()}</p>
+          `;
+        }
+
+        carte.innerHTML = contenu;
 
         if (data.categorie === "methode") document.getElementById("col-methode").appendChild(carte);
         if (data.categorie === "qualite") document.getElementById("col-qualite").appendChild(carte);
