@@ -4,129 +4,36 @@
   <meta charset="UTF-8">
   <title>Tableau Besoins Production</title>
   <link rel="stylesheet" href="styles.css">
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #007BFF;
-      color: white;
-      padding: 15px;
-    }
-    h1 {
-      margin: 0;
-    }
-    main.colonnes {
-      display: flex;
-      justify-content: space-around;
-      margin: 20px;
-    }
-    section.colonne {
-      flex: 1;
-      margin: 0 10px;
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
     .carte {
-      background: #f9f9f9;
-      margin: 10px 0;
-      padding: 10px;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      padding: 10px;
+      margin: 8px 0;
+      background: #fff;
     }
-    button {
+    button.cloture {
+      margin-top: 8px;
       padding: 6px 12px;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
-    }
-    button.demande {
       background: #28a745;
       color: white;
-      font-weight: bold;
+      cursor: pointer;
     }
-    button.cloture {
-      background: #dc3545;
-      color: white;
-      margin-top: 5px;
-    }
-    #formulaire-container {
-      display: none;
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    #formulaire-container h2 {
-      margin-top: 0;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    select, input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    #formulaire-container button[type="submit"] {
-      background: #007BFF;
-      color: white;
-      font-weight: bold;
-      margin-top: 15px;
+    button.cloture:hover {
+      background: #218838;
     }
   </style>
 </head>
 <body class="mode-affichage">
   <header>
     <h1>📊 Besoins de Production</h1>
-    <div>
-      <button class="demande" onclick="toggleForm()">➕ Lancer une demande</button>
-      <span id="horloge"></span>
-    </div>
+    <span id="horloge"></span>
   </header>
-
-  <!-- Formulaire caché -->
-  <div id="formulaire-container">
-    <h2>Ajouter un besoin</h2>
-    <form id="form-besoin">
-      <label for="categorie">Catégorie</label>
-      <select id="categorie" required>
-        <option value="methode">Méthodes</option>
-        <option value="qualite">Qualité</option>
-        <option value="controle">Contrôle</option>
-      </select>
-
-      <label for="programme">Programme concerné</label>
-      <input type="text" id="programme" placeholder="Ex: Ligne A" required>
-
-      <label for="commentaire">Commentaire</label>
-      <textarea id="commentaire" rows="3" placeholder="Décrire le besoin..." required></textarea>
-
-      <label for="auteur">Votre nom</label>
-      <input type="text" id="auteur" placeholder="Nom du superviseur" required>
-
-      <button type="submit">Ajouter besoin</button>
-    </form>
-  </div>
 
   <main class="colonnes">
     <section class="colonne methode">
@@ -146,7 +53,7 @@
   </main>
 
   <script>
-    // Config Firebase
+    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDG4nSTlJjYZiQrqcryhy-cEIkxUBkgi-c",
       authDomain: "suivi-besoins-prod.firebaseapp.com",
@@ -156,7 +63,7 @@
       appId: "1:214097049405:web:d91b0e4f31077907ea7754"
     };
 
-    // Initialisation
+    // Initialisation Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -165,68 +72,26 @@
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Toggle affichage formulaire
-    function toggleForm() {
-      const form = document.getElementById("formulaire-container");
-      form.style.display = form.style.display === "none" ? "block" : "none";
-    }
-
-    // Générer un ID unique pour le PC (stocké une fois en localStorage)
-    function getPcId() {
-      let id = localStorage.getItem("pcId");
-      if (!id) {
-        id = "PC-" + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem("pcId", id);
-      }
-      return id;
-    }
-
-    // Clôturer un besoin
+    // Fonction pour clore un besoin
     async function cloturerBesoin(idDoc) {
-      const nom = prompt("Qui clôture ce besoin ?");
-      if (!nom) return;
+      const cloturePar = prompt("Qui clôture ce besoin ?");
+      if (!cloturePar) return;
+
+      const pcId = navigator.userAgent; // identifiant basique du navigateur
 
       try {
         await db.collection("besoins").doc(idDoc).update({
           statut: "clos",
-          cloturePar: nom,
-          pcId: getPcId(),
+          cloturePar,
+          pcId,
           clotureDate: firebase.firestore.Timestamp.now()
         });
-        alert("✅ Besoin clôturé !");
+        alert("✅ Besoin clôturé avec succès !");
       } catch (error) {
-        console.error("Erreur clôture :", error);
-        alert("❌ Impossible de clôturer.");
+        console.error("Erreur lors de la clôture :", error);
+        alert("❌ Erreur lors de la clôture du besoin.");
       }
     }
-
-    // Envoi formulaire
-    document.getElementById("form-besoin").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const categorie = document.getElementById("categorie").value;
-      const programme = document.getElementById("programme").value;
-      const commentaire = document.getElementById("commentaire").value;
-      const auteur = document.getElementById("auteur").value;
-
-      try {
-        await db.collection("besoins").add({
-          categorie,
-          programme,
-          commentaire,
-          auteur,
-          date: firebase.firestore.Timestamp.now(),
-          statut: "ouvert"
-        });
-
-        alert("✅ Besoin ajouté avec succès !");
-        e.target.reset();
-        document.getElementById("formulaire-container").style.display = "none";
-      } catch (error) {
-        console.error("Erreur :", error);
-        alert("❌ Erreur lors de l’ajout du besoin.");
-      }
-    });
 
     // Affichage temps réel
     db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
@@ -245,12 +110,17 @@
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
 
-        if (data.statut === "ouvert") {
+        // ⚡️ Par défaut, on considère "ouvert" si statut absent
+        const statut = data.statut || "ouvert";
+
+        if (statut === "ouvert") {
           contenu += `<br><button class="cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
-        } else if (data.statut === "clos") {
+        } else if (statut === "clos") {
           contenu += `
-            <p style="color:green;"><strong>Clôturé</strong> par ${data.cloturePar}
-            (${data.pcId}) le ${data.clotureDate.toDate().toLocaleString()}</p>
+            <p style="color:green;">
+              <strong>Clôturé</strong> par ${data.cloturePar || "?"}
+              (${data.pcId || "?"}) le ${data.clotureDate?.toDate().toLocaleString() || "?"}
+            </p>
           `;
         }
 
@@ -264,3 +134,4 @@
   </script>
 </body>
 </html>
+
