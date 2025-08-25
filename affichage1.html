@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau Besoins Production</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="mode-affichage">
+  <header>
+    <h1>📊 Besoins de Production</h1>
+    <span id="horloge"></span>
+  </header>
+
+  <main class="colonnes">
+    <section class="colonne methode">
+      <h2>🛠️ Méthodes</h2>
+      <div id="col-methode" class="liste-cartes"></div>
+    </section>
+
+    <section class="colonne qualite">
+      <h2>✅ Qualité</h2>
+      <div id="col-qualite" class="liste-cartes"></div>
+    </section>
+
+    <section class="colonne controle">
+      <h2>🔍 Contrôle</h2>
+      <div id="col-controle" class="liste-cartes"></div>
+    </section>
+  </main>
+
+  <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG4nSTlJjYZiQrqcryhy-cEIkxUBkgi-c",
+      authDomain: "suivi-besoins-prod.firebaseapp.com",
+      projectId: "suivi-besoins-prod",
+      storageBucket: "suivi-besoins-prod.firebasestorage.app",
+      messagingSenderId: "214097049405",
+      appId: "1:214097049405:web:d91b0e4f31077907ea7754"
+    };
+
+    // Initialisation Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Horloge
+    setInterval(() => {
+      document.getElementById("horloge").textContent = new Date().toLocaleString();
+    }, 1000);
+
+    // Affichage temps réel
+    db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
+      document.getElementById("col-methode").innerHTML = "";
+      document.getElementById("col-qualite").innerHTML = "";
+      document.getElementById("col-controle").innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const carte = document.createElement("div");
+        carte.classList.add("carte");
+        carte.innerHTML = `
+          <strong>${data.programme}</strong>
+          <p>${data.commentaire}</p>
+          <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
+        `;
+
+        if (data.categorie === "methode") document.getElementById("col-methode").appendChild(carte);
+        if (data.categorie === "qualite") document.getElementById("col-qualite").appendChild(carte);
+        if (data.categorie === "controle") document.getElementById("col-controle").appendChild(carte);
+      });
+    });
+  </script>
+</body>
+</html>

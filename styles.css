@@ -1,0 +1,73 @@
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #222;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 30px;
+  font-size: 1.5em;
+}
+
+.mode-affichage h1 {
+  margin: 0;
+}
+
+#horloge {
+  font-size: 0.8em;
+  color: #ccc;
+}
+
+.colonnes {
+  display: flex;
+  height: calc(100vh - 70px);
+}
+
+.colonne {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.colonne h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+  color: white;
+}
+
+.methode { background: #1565c0; }
+.qualite { background: #2e7d32; }
+.controle { background: #b71c1c; }
+
+.liste-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carte {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-size: 1.2em;
+}
+
+.carte strong {
+  font-size: 1.4em;
+  display: block;
+}
+
+.carte p {
+  margin: 8px 0;
+}
+
+.carte small {
+  color: gray;
+}

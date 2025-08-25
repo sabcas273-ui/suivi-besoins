@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des besoins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    select, input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ajouter un besoin</h1>
+
+  <form id="form-besoin">
+    <label for="categorie">Catégorie</label>
+    <select id="categorie" required>
+      <option value="methode">Méthodes</option>
+      <option value="qualite">Qualité</option>
+      <option value="controle">Contrôle</option>
+    </select>
+
+    <label for="programme">Programme concerné</label>
+    <input type="text" id="programme" placeholder="Ex: Ligne A" required>
+
+    <label for="commentaire">Commentaire</label>
+    <textarea id="commentaire" rows="3" placeholder="Décrire le besoin..." required></textarea>
+
+    <label for="auteur">Votre nom</label>
+    <input type="text" id="auteur" placeholder="Nom du superviseur" required>
+
+    <button type="submit">Ajouter besoin</button>
+  </form>
+
+  <!-- Firebase v8 (même version que affichage.html) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG4nSTlJjYZiQrqcryhy-cEIkxUBkgi-c",
+      authDomain: "suivi-besoins-prod.firebaseapp.com",
+      projectId: "suivi-besoins-prod",
+      storageBucket: "suivi-besoins-prod.firebasestorage.app",
+      messagingSenderId: "214097049405",
+      appId: "1:214097049405:web:d91b0e4f31077907ea7754"
+    };
+
+    // Initialisation
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Gestion formulaire
+    document.getElementById("form-besoin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const categorie = document.getElementById("categorie").value;
+      const programme = document.getElementById("programme").value;
+      const commentaire = document.getElementById("commentaire").value;
+      const auteur = document.getElementById("auteur").value;
+
+      try {
+        await db.collection("besoins").add({
+          categorie,
+          programme,
+          commentaire,
+          auteur,
+          date: firebase.firestore.Timestamp.now(),
+          statut: "ouvert"
+        });
+
+        alert("✅ Besoin ajouté avec succès !");
+        e.target.reset();
+      } catch (error) {
+        console.error("Erreur :", error);
+        alert("❌ Erreur lors de l’ajout du besoin.");
+      }
+    });
+  </script>
+</body>
+</html>
