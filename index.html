@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <style>
-    /* On ajoute uniquement un style pour le bouton Clôturer */
+    /* Bouton Clôturer */
     .btn-cloture {
       margin-top: 6px;
       padding: 5px 12px;
@@ -23,12 +23,36 @@
     .btn-cloture:hover {
       background-color: #218838;
     }
+
+    /* Bouton "Lancer une demande" */
+    .btn-demande {
+      padding: 10px 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-demande:hover {
+      background-color: #0056b3;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body class="mode-affichage">
   <header>
     <h1>📊 Besoins de Production</h1>
-    <span id="horloge"></span>
+    <div>
+      <button class="btn-demande" onclick="ouvrirFormulaire()">➕ Lancer une demande</button>
+      <span id="horloge"></span>
+    </div>
   </header>
 
   <main class="colonnes">
@@ -67,6 +91,11 @@
     setInterval(() => {
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
+
+    // Ouvrir formulaire (nouvel onglet ou popup)
+    function ouvrirFormulaire() {
+      window.open("gestion.html", "_blank"); // ouvre ton formulaire de saisie
+    }
 
     // Fonction de clôture
     async function cloturerBesoin(id) {
