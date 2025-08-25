@@ -4,120 +4,55 @@
   <meta charset="UTF-8">
   <title>Besoins de Production</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-    }
+    body { margin:0; font-family:Arial, sans-serif; background:#f4f6f8; }
     header {
-      background: #222;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background:#222; color:white; padding:15px 20px;
+      display:flex; justify-content:space-between; align-items:center;
     }
-    header h1 {
-      margin: 0;
-      font-size: 24px;
-    }
+    header h1 { margin:0; font-size:24px; }
     header button {
-      margin-left: 20px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      background: #007BFF;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+      margin-left:20px; padding:10px 15px; border:none;
+      border-radius:8px; background:#007BFF; color:white; font-weight:bold; cursor:pointer;
     }
-    header button:hover {
-      background: #0056b3;
-    }
-    main {
-      display: flex;
-      height: calc(100vh - 70px);
-    }
-    section {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      color: white;
-    }
-    .methode { background: #1e73be; }
-    .qualite { background: #2e7d32; }
-    .controle { background: #c62828; }
-    h2 {
-      text-align: center;
-    }
+    header button:hover { background:#0056b3; }
+    main { display:flex; height:calc(100vh - 70px); }
+    section { flex:1; padding:10px; overflow-y:auto; color:white; }
+    .methode { background:#1e73be; }
+    .qualite { background:#2e7d32; }
+    .controle { background:#c62828; }
+    h2 { text-align:center; }
     .carte {
-      background: white;
-      color: #333;
-      border-radius: 8px;
-      padding: 10px;
-      margin: 10px 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      background:white; color:#333; border-radius:8px;
+      padding:10px; margin:10px 0; box-shadow:0 2px 6px rgba(0,0,0,0.2);
     }
-    .carte strong {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 5px;
+    .carte strong { display:block; font-size:16px; margin-bottom:5px; }
+    .carte small { color:#555; font-size:12px; display:block; margin-top:5px; }
+    .btn-cloture {
+      display:block; width:100%; margin-top:10px; padding:6px;
+      border:none; border-radius:6px; cursor:pointer;
+      background:#dc3545; color:white; font-weight:bold;
     }
-    .carte small {
-      color: #555;
-      font-size: 12px;
-    }
-    /* 🔹 Formulaire en popup modal */
+    .btn-cloture:hover { background:#a71d2a; }
+    /* Formulaire modal */
     #form-container {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.5); justify-content:center; align-items:center;
     }
     #form-besoin {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 400px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      background:white; padding:20px; border-radius:10px; width:400px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);
     }
-    #form-besoin label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-    #form-besoin input,
-    #form-besoin select,
-    #form-besoin textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    #form-besoin label { font-weight:bold; display:block; margin-top:10px; }
+    #form-besoin input, #form-besoin select, #form-besoin textarea {
+      width:100%; padding:8px; margin-top:5px; border-radius:6px; border:1px solid #ccc;
     }
     #form-besoin button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 6px;
-      background: #007BFF;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+      width:100%; padding:10px; margin-top:15px; border:none;
+      border-radius:6px; background:#007BFF; color:white; font-weight:bold; cursor:pointer;
     }
-    #form-besoin button:hover {
-      background: #0056b3;
-    }
-    .close-btn {
-      background: #dc3545 !important;
-    }
-    .close-btn:hover {
-      background: #a71d2a !important;
-    }
+    #form-besoin button:hover { background:#0056b3; }
+    .close-btn { background:#dc3545 !important; }
+    .close-btn:hover { background:#a71d2a !important; }
   </style>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -147,7 +82,7 @@
     </section>
   </main>
 
-  <!-- 🔹 Formulaire modal -->
+  <!-- Formulaire modal -->
   <div id="form-container">
     <form id="form-besoin">
       <h2>➕ Ajouter un besoin</h2>
@@ -184,14 +119,19 @@
       appId: "1:214097049405:web:d91b0e4f31077907ea7754"
     };
 
-    // 🔹 Initialisation
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 🔹 Horloge
+    // Horloge
     setInterval(() => {
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
+
+    // 🔹 Récupérer IP
+    let userIP = "";
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => userIP = data.ip);
 
     // 🔹 Affichage temps réel
     db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
@@ -203,18 +143,49 @@
         const data = doc.data();
         const carte = document.createElement("div");
         carte.classList.add("carte");
-        carte.innerHTML = `
+
+        let contenu = `
           <strong>${data.programme}</strong>
           <p>${data.commentaire}</p>
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
+
+        if (data.statut === "cloturé") {
+          contenu += `
+            <small>✅ Clôturé par ${data.cloturePar} (${data.clotureIP}) le ${data.clotureDate.toDate().toLocaleString()}</small>
+          `;
+        } else {
+          contenu += `<button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">Clôturer</button>`;
+        }
+
+        carte.innerHTML = contenu;
+
         if (data.categorie === "methode") document.getElementById("col-methode").appendChild(carte);
         if (data.categorie === "qualite") document.getElementById("col-qualite").appendChild(carte);
         if (data.categorie === "controle") document.getElementById("col-controle").appendChild(carte);
       });
     });
 
-    // 🔹 Gestion formulaire
+    // 🔹 Clôturer un besoin
+    async function cloturerBesoin(id) {
+      const cloturePar = prompt("Votre nom pour clôture ?");
+      if (!cloturePar) return;
+
+      try {
+        await db.collection("besoins").doc(id).update({
+          statut: "cloturé",
+          cloturePar,
+          clotureIP: userIP,
+          clotureDate: firebase.firestore.Timestamp.now()
+        });
+        alert("✅ Besoin clôturé avec succès !");
+      } catch (e) {
+        console.error(e);
+        alert("❌ Erreur lors de la clôture");
+      }
+    }
+
+    // 🔹 Gestion formulaire ajout
     document.getElementById("form-besoin").addEventListener("submit", async (e) => {
       e.preventDefault();
       const categorie = document.getElementById("categorie").value;
@@ -231,22 +202,18 @@
           date: firebase.firestore.Timestamp.now(),
           statut: "ouvert"
         });
-        alert("✅ Besoin ajouté avec succès !");
+        alert("✅ Besoin ajouté !");
         fermerForm();
         e.target.reset();
       } catch (error) {
-        console.error("Erreur :", error);
+        console.error(error);
         alert("❌ Erreur lors de l’ajout du besoin.");
       }
     });
 
-    // 🔹 Fonctions ouverture/fermeture modal
-    function ouvrirForm() {
-      document.getElementById("form-container").style.display = "flex";
-    }
-    function fermerForm() {
-      document.getElementById("form-container").style.display = "none";
-    }
+    // Fonctions ouverture/fermeture formulaire
+    function ouvrirForm() { document.getElementById("form-container").style.display = "flex"; }
+    function fermerForm() { document.getElementById("form-container").style.display = "none"; }
   </script>
 </body>
 </html>
