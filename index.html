@@ -8,23 +8,20 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <style>
-    /* Style spécial uniquement pour le bouton de clôture */
+    /* On ajoute uniquement un style pour le bouton Clôturer */
     .btn-cloture {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 6px 14px;
-      background: linear-gradient(135deg, #28a745, #218838);
+      margin-top: 6px;
+      padding: 5px 12px;
+      background-color: #28a745;
       color: white;
-      font-weight: bold;
       border: none;
-      border-radius: 20px;
+      border-radius: 6px;
+      font-size: 0.85em;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9em;
+      transition: background-color 0.3s ease;
     }
     .btn-cloture:hover {
-      background: linear-gradient(135deg, #218838, #1e7e34);
-      transform: scale(1.05);
+      background-color: #218838;
     }
   </style>
 </head>
@@ -71,7 +68,7 @@
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Fonction Clôturer
+    // Fonction de clôture
     async function cloturerBesoin(id) {
       const auteur = prompt("Qui clôture ce besoin ?");
       if (!auteur) return;
@@ -106,7 +103,7 @@
         `;
 
         if (data.statut === "ouvert") {
-          contenu += `<br><button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
+          contenu += `<br><button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">Clôturer</button>`;
         } else if (data.statut === "clos") {
           contenu += `<p style="color:green;font-size:0.9em;margin-top:6px;">
             ✅ Clôturé par <strong>${data.cloturePar}</strong><br>
