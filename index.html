@@ -110,12 +110,10 @@
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
 
-        // ⚡️ Par défaut, on considère "ouvert" si statut absent
-        const statut = data.statut || "ouvert";
-
-        if (statut === "ouvert") {
+        // Forcer affichage bouton si statut absent ou = "ouvert"
+        if (!data.statut || data.statut === "ouvert") {
           contenu += `<br><button class="cloture" onclick="cloturerBesoin('${doc.id}')">✅ Clôturer</button>`;
-        } else if (statut === "clos") {
+        } else if (data.statut === "clos") {
           contenu += `
             <p style="color:green;">
               <strong>Clôturé</strong> par ${data.cloturePar || "?"}
@@ -134,4 +132,3 @@
   </script>
 </body>
 </html>
-
