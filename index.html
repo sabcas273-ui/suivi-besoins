@@ -20,24 +20,21 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-    .btn-cloture:hover {
-      background-color: #218838;
-    }
+    .btn-cloture:hover { background-color: #218838; }
 
     /* Bouton "Lancer une demande" */
     .btn-demande {
-      padding: 10px 18px;
+      padding: 8px 14px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 1em;
+      font-size: 0.9em;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      margin-right: 15px;
     }
-    .btn-demande:hover {
-      background-color: #0056b3;
-    }
+    .btn-demande:hover { background-color: #0056b3; }
 
     header {
       display: flex;
@@ -83,7 +80,6 @@
       appId: "1:214097049405:web:d91b0e4f31077907ea7754"
     };
 
-    // Initialisation Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -92,25 +88,23 @@
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Ouvrir formulaire (nouvel onglet ou popup)
+    // Ouvrir formulaire
     function ouvrirFormulaire() {
-      window.open("gestion.html", "_blank"); // ouvre ton formulaire de saisie
+      window.open("gestion.html", "_blank");
     }
 
     // Fonction de clôture
     async function cloturerBesoin(id) {
       const auteur = prompt("Qui clôture ce besoin ?");
       if (!auteur) return;
-
       try {
         await db.collection("besoins").doc(id).update({
           statut: "clos",
           cloturePar: auteur,
           clotureLe: firebase.firestore.Timestamp.now()
         });
-      } catch (error) {
-        console.error("Erreur clôture :", error);
-        alert("❌ Erreur lors de la clôture.");
+      } catch (e) {
+        alert("❌ Erreur clôture");
       }
     }
 
@@ -134,7 +128,7 @@
         if (data.statut === "ouvert") {
           contenu += `<br><button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">Clôturer</button>`;
         } else if (data.statut === "clos") {
-          contenu += `<p style="color:green;font-size:0.9em;margin-top:6px;">
+          contenu += `<p style="color:lightgreen;font-size:0.9em;margin-top:6px;">
             ✅ Clôturé par <strong>${data.cloturePar}</strong><br>
             📅 ${data.clotureLe.toDate().toLocaleString()}
           </p>`;
