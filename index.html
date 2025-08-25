@@ -2,75 +2,179 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Tableau Besoins Production</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <title>Besoins de Production</title>
   <style>
-    /* Bouton Clôturer */
-    .btn-cloture {
-      margin-top: 6px;
-      padding: 5px 12px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.85em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
     }
-    .btn-cloture:hover { background-color: #218838; }
-
-    /* Bouton "Lancer une demande" */
-    .btn-demande {
-      padding: 8px 14px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.9em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-right: 15px;
-    }
-    .btn-demande:hover { background-color: #0056b3; }
-
     header {
+      background: #222;
+      color: white;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    header button {
+      margin-left: 20px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    header button:hover {
+      background: #0056b3;
+    }
+    main {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+    section {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      color: white;
+    }
+    .methode { background: #1e73be; }
+    .qualite { background: #2e7d32; }
+    .controle { background: #c62828; }
+    h2 {
+      text-align: center;
+    }
+    .carte {
+      background: white;
+      color: #333;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .carte strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    .carte small {
+      color: #555;
+      font-size: 12px;
+    }
+    /* 🔹 Formulaire en popup modal */
+    #form-container {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    #form-besoin {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    #form-besoin label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    #form-besoin input,
+    #form-besoin select,
+    #form-besoin textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    #form-besoin button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 6px;
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #form-besoin button:hover {
+      background: #0056b3;
+    }
+    .close-btn {
+      background: #dc3545 !important;
+    }
+    .close-btn:hover {
+      background: #a71d2a !important;
+    }
   </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
-<body class="mode-affichage">
+<body>
   <header>
     <h1>📊 Besoins de Production</h1>
     <div>
-      <button class="btn-demande" onclick="ouvrirFormulaire()">➕ Lancer une demande</button>
       <span id="horloge"></span>
+      <button onclick="ouvrirForm()">➕ Lancer une demande</button>
     </div>
   </header>
 
-  <main class="colonnes">
-    <section class="colonne methode">
+  <main>
+    <section class="methode">
       <h2>🛠️ Méthodes</h2>
-      <div id="col-methode" class="liste-cartes"></div>
+      <div id="col-methode"></div>
     </section>
-
-    <section class="colonne qualite">
+    <section class="qualite">
       <h2>✅ Qualité</h2>
-      <div id="col-qualite" class="liste-cartes"></div>
+      <div id="col-qualite"></div>
     </section>
-
-    <section class="colonne controle">
+    <section class="controle">
       <h2>🔍 Contrôle</h2>
-      <div id="col-controle" class="liste-cartes"></div>
+      <div id="col-controle"></div>
     </section>
   </main>
 
+  <!-- 🔹 Formulaire modal -->
+  <div id="form-container">
+    <form id="form-besoin">
+      <h2>➕ Ajouter un besoin</h2>
+
+      <label for="categorie">Catégorie</label>
+      <select id="categorie" required>
+        <option value="methode">Méthodes</option>
+        <option value="qualite">Qualité</option>
+        <option value="controle">Contrôle</option>
+      </select>
+
+      <label for="programme">Programme concerné</label>
+      <input type="text" id="programme" placeholder="Ex: Ligne A" required>
+
+      <label for="commentaire">Commentaire</label>
+      <textarea id="commentaire" rows="3" placeholder="Décrire le besoin..." required></textarea>
+
+      <label for="auteur">Votre nom</label>
+      <input type="text" id="auteur" placeholder="Nom du superviseur" required>
+
+      <button type="submit">✅ Ajouter besoin</button>
+      <button type="button" class="close-btn" onclick="fermerForm()">❌ Annuler</button>
+    </form>
+  </div>
+
   <script>
-    // Configuration Firebase
+    // 🔹 Config Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDG4nSTlJjYZiQrqcryhy-cEIkxUBkgi-c",
       authDomain: "suivi-besoins-prod.firebaseapp.com",
@@ -80,35 +184,16 @@
       appId: "1:214097049405:web:d91b0e4f31077907ea7754"
     };
 
+    // 🔹 Initialisation
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Horloge
+    // 🔹 Horloge
     setInterval(() => {
       document.getElementById("horloge").textContent = new Date().toLocaleString();
     }, 1000);
 
-    // Ouvrir formulaire
-    function ouvrirFormulaire() {
-      window.open("gestion.html", "_blank");
-    }
-
-    // Fonction de clôture
-    async function cloturerBesoin(id) {
-      const auteur = prompt("Qui clôture ce besoin ?");
-      if (!auteur) return;
-      try {
-        await db.collection("besoins").doc(id).update({
-          statut: "clos",
-          cloturePar: auteur,
-          clotureLe: firebase.firestore.Timestamp.now()
-        });
-      } catch (e) {
-        alert("❌ Erreur clôture");
-      }
-    }
-
-    // Affichage temps réel
+    // 🔹 Affichage temps réel
     db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
       document.getElementById("col-methode").innerHTML = "";
       document.getElementById("col-qualite").innerHTML = "";
@@ -118,31 +203,50 @@
         const data = doc.data();
         const carte = document.createElement("div");
         carte.classList.add("carte");
-
-        let contenu = `
+        carte.innerHTML = `
           <strong>${data.programme}</strong>
           <p>${data.commentaire}</p>
           <small>Par ${data.auteur} — ${data.date.toDate().toLocaleString()}</small>
         `;
-
-        if (data.statut === "ouvert") {
-          contenu += `<br><button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">Clôturer</button>`;
-        } else if (data.statut === "clos") {
-          contenu += `<p style="color:lightgreen;font-size:0.9em;margin-top:6px;">
-            ✅ Clôturé par <strong>${data.cloturePar}</strong><br>
-            📅 ${data.clotureLe.toDate().toLocaleString()}
-          </p>`;
-        }
-
-        carte.innerHTML = contenu;
-
         if (data.categorie === "methode") document.getElementById("col-methode").appendChild(carte);
         if (data.categorie === "qualite") document.getElementById("col-qualite").appendChild(carte);
         if (data.categorie === "controle") document.getElementById("col-controle").appendChild(carte);
       });
-      <h2 style="color:yellow">TEST</h2>
     });
+
+    // 🔹 Gestion formulaire
+    document.getElementById("form-besoin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const categorie = document.getElementById("categorie").value;
+      const programme = document.getElementById("programme").value;
+      const commentaire = document.getElementById("commentaire").value;
+      const auteur = document.getElementById("auteur").value;
+
+      try {
+        await db.collection("besoins").add({
+          categorie,
+          programme,
+          commentaire,
+          auteur,
+          date: firebase.firestore.Timestamp.now(),
+          statut: "ouvert"
+        });
+        alert("✅ Besoin ajouté avec succès !");
+        fermerForm();
+        e.target.reset();
+      } catch (error) {
+        console.error("Erreur :", error);
+        alert("❌ Erreur lors de l’ajout du besoin.");
+      }
+    });
+
+    // 🔹 Fonctions ouverture/fermeture modal
+    function ouvrirForm() {
+      document.getElementById("form-container").style.display = "flex";
+    }
+    function fermerForm() {
+      document.getElementById("form-container").style.display = "none";
+    }
   </script>
 </body>
 </html>
-
