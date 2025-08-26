@@ -133,11 +133,15 @@
       .then(res => res.json())
       .then(data => userIP = data.ip);
 
-    // 🔹 Affichage temps réel
+    // 🔹 Affichage temps réel avec tri (ouverts en haut, clôturés en bas)
     db.collection("besoins").orderBy("date").onSnapshot(snapshot => {
       document.getElementById("col-methode").innerHTML = "";
       document.getElementById("col-qualite").innerHTML = "";
       document.getElementById("col-controle").innerHTML = "";
+
+      let besoinsMethodeOuverts = [], besoinsMethodeClotures = [];
+      let besoinsQualiteOuverts = [], besoinsQualiteClotures = [];
+      let besoinsControleOuverts = [], besoinsControleClotures = [];
 
       snapshot.forEach(doc => {
         const data = doc.data();
@@ -152,7 +156,10 @@
 
         if (data.statut === "cloturé") {
           contenu += `
-            <small>✅ Clôturé par ${data.cloturePar} (${data.clotureIP}) le ${data.clotureDate.toDate().toLocaleString()}</small>
+            <small style="color:green;font-weight:bold;">
+              ✅ Clôturé par ${data.cloturePar} (${data.clotureIP})<br>
+              le ${data.clotureDate.toDate().toLocaleString()}
+            </small>
           `;
         } else {
           contenu += `<button class="btn-cloture" onclick="cloturerBesoin('${doc.id}')">Clôturer</button>`;
@@ -160,10 +167,31 @@
 
         carte.innerHTML = contenu;
 
-        if (data.categorie === "methode") document.getElementById("col-methode").appendChild(carte);
-        if (data.categorie === "qualite") document.getElementById("col-qualite").appendChild(carte);
-        if (data.categorie === "controle") document.getElementById("col-controle").appendChild(carte);
+        if (data.categorie === "methode") {
+          if (data.statut === "cloturé") besoinsMethodeClotures.push(carte);
+          else besoinsMethodeOuverts.push(carte);
+        }
+        if (data.categorie === "qualite") {
+          if (data.statut === "cloturé") besoinsQualiteClotures.push(carte);
+          else besoinsQualiteOuverts.push(carte);
+        }
+        if (data.categorie === "controle") {
+          if (data.statut === "cloturé") besoinsControleClotures.push(carte);
+          else besoinsControleOuverts.push(carte);
+        }
       });
+
+      const colM = document.getElementById("col-methode");
+      besoinsMethodeOuverts.forEach(c => colM.appendChild(c));
+      besoinsMethodeClotures.forEach(c => colM.appendChild(c));
+
+      const colQ = document.getElementById("col-qualite");
+      besoinsQualiteOuverts.forEach(c => colQ.appendChild(c));
+      besoinsQualiteClotures.forEach(c => colQ.appendChild(c));
+
+      const colC = document.getElementById("col-controle");
+      besoinsControleOuverts.forEach(c => colC.appendChild(c));
+      besoinsControleClotures.forEach(c => colC.appendChild(c));
     });
 
     // 🔹 Clôturer un besoin
